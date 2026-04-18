@@ -3,6 +3,33 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # --------------------------
+# 🔐 登录验证（账号密码都是 MAGO123）
+# --------------------------
+def check_password():
+    def password_entered():
+        if (
+            st.session_state["username"] == "MAGO123"
+            and st.session_state["password"] == "MAGO123"
+        ):
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]
+            del st.session_state["username"]
+        else:
+            st.session_state["password_correct"] = False
+
+    if not st.session_state.get("password_correct", False):
+        st.markdown("## 🔒 请登录使用")
+        st.text_input("用户名", key="username", on_change=password_entered)
+        st.text_input("密码", type="password", key="password", on_change=password_entered)
+        if "password_correct" in st.session_state:
+            st.error("❌ 用户名或密码错误")
+        st.stop()
+    return True
+
+if not check_password():
+    st.stop()
+
+# --------------------------
 # 初始化会话状态
 # --------------------------
 if "name" not in st.session_state:
@@ -103,11 +130,8 @@ if st.session_state.name.strip() and st.session_state.student_id.strip():
         st.session_state.score5
     ]
 
-    # ==============================================
-    # 左图：柱状图
-    # ==============================================
+    # 柱状图
     col_chart1, col_chart2 = st.columns(2)
-
     with col_chart1:
         st.write("📊 柱状图")
         fig1, ax1 = plt.subplots(figsize=(6, 5))
@@ -123,9 +147,7 @@ if st.session_state.name.strip() and st.session_state.student_id.strip():
         plt.xticks(rotation=20, fontsize=9)
         st.pyplot(fig1)
 
-    # ==============================================
-    # 右图：雷达图（你要加的！）
-    # ==============================================
+    # 雷达图
     with col_chart2:
         st.write("📈 雷达图")
         N = len(subjects)
