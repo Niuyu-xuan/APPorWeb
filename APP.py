@@ -3,30 +3,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # --------------------------
-# 🔐 登录验证（账号密码都是 MAGO123）
+# 🔐 登录页面（带登录按钮！）
 # --------------------------
-def check_password():
-    def password_entered():
-        if (
-            st.session_state["username"] == "MAGO123"
-            and st.session_state["password"] == "MAGO123"
-        ):
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]
-            del st.session_state["username"]
+def login_page():
+    st.markdown("## 🔒 请登录使用")
+    username = st.text_input("用户名")
+    password = st.text_input("密码", type="password")
+    login_button = st.button("登录")
+
+    if login_button:
+        if username == "MAGO123" and password == "MAGO123":
+            st.session_state["logged_in"] = True
+            st.rerun()
         else:
-            st.session_state["password_correct"] = False
+            st.error("❌ 用户名或密码错误，请重试！")
 
-    if not st.session_state.get("password_correct", False):
-        st.markdown("## 🔒 请登录使用")
-        st.text_input("用户名", key="username", on_change=password_entered)
-        st.text_input("密码", type="password", key="password", on_change=password_entered)
-        if "password_correct" in st.session_state:
-            st.error("❌ 用户名或密码错误")
-        st.stop()
-    return True
+# --------------------------
+# 登录验证
+# --------------------------
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
-if not check_password():
+if not st.session_state.logged_in:
+    login_page()
     st.stop()
 
 # --------------------------
@@ -48,7 +47,7 @@ if "score5" not in st.session_state:
     st.session_state.score5 = 0
 
 # --------------------------
-# 页面设置
+# 页面设置 + 云端中文修复
 # --------------------------
 st.set_page_config(
     page_title="📚 大学数学成绩查询",
@@ -57,7 +56,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-plt.rcParams["font.sans-serif"] = ["SimHei", "Microsoft YaHei"]
+plt.rcParams["font.sans-serif"] = ["WenQuanYi Zen Hei", "DejaVu Sans"]
 plt.rcParams["axes.unicode_minus"] = False
 
 # --------------------------
@@ -149,7 +148,7 @@ if st.session_state.name.strip() and st.session_state.student_id.strip():
 
     # 雷达图
     with col_chart2:
-        st.write("📈 雷达图")
+        st.write("📈 雷达图")    
         N = len(subjects)
         angles = np.linspace(0, 2 * np.pi, N, endpoint=False).tolist()
         scores_plot = scores.copy()
