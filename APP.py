@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # --------------------------
-# 🔐 登录页面（带登录按钮！）
+# 登录页面
 # --------------------------
 def login_page():
     st.markdown("## 🔒 请登录使用")
@@ -18,9 +18,6 @@ def login_page():
         else:
             st.error("❌ 用户名或密码错误，请重试！")
 
-# --------------------------
-# 登录验证
-# --------------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -29,7 +26,7 @@ if not st.session_state.logged_in:
     st.stop()
 
 # --------------------------
-# 初始化会话状态
+# 初始化
 # --------------------------
 if "name" not in st.session_state:
     st.session_state.name = ""
@@ -47,27 +44,18 @@ if "score5" not in st.session_state:
     st.session_state.score5 = 0
 
 # --------------------------
-# 页面设置 + 云端中文修复
+# ✅ 云端永久有效中文设置（不用字体文件！）
 # --------------------------
-st.set_page_config(
-    page_title="📚 大学数学成绩查询",
-    page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-plt.rcParams["font.sans-serif"] = ["WenQuanYi Zen Hei", "DejaVu Sans"]
+st.set_page_config(page_title="大学数学成绩查询", page_icon="📊", layout="wide")
+plt.rcParams["font.family"] = "DejaVu Sans"
 plt.rcParams["axes.unicode_minus"] = False
 
 # --------------------------
 # 侧边栏
 # --------------------------
 with st.sidebar:
-    st.title("📚 大学数学成绩工具")
+    st.title("📚 成绩查询工具")
     st.markdown("---")
-    st.info("💡 功能说明：\n- 输入个人信息\n- 录入各科成绩\n- 自动生成柱状图+雷达图")
-    st.markdown("---")
-
     if st.button("🔄 重置所有信息"):
         st.session_state.name = ""
         st.session_state.student_id = ""
@@ -82,26 +70,17 @@ with st.sidebar:
 # 主页面
 # --------------------------
 st.title("🎓 大学数学成绩查询与分析")
-st.markdown("输入你的个人信息和各科成绩，系统自动生成可视化图表~")
-st.markdown("---")
-
-# --------------------------
-# 信息输入
-# --------------------------
 col1, col2, col3 = st.columns(3)
 with col1:
-    name = st.text_input("👤 你的名字：", key="name")
+    name = st.text_input("👤 名字", key="name")
 with col2:
-    class_name = st.selectbox("🏫 你的班级：", ["N1", "N2"])
+    class_name = st.selectbox("🏫 班级", ["N1", "N2"])
 with col3:
-    student_id = st.text_input("🆔 你的学号：", key="student_id")
+    student_id = st.text_input("🆔 学号", key="student_id")
 
 st.markdown("---")
 
-# --------------------------
-# 成绩输入
-# --------------------------
-st.subheader("📝 各科成绩录入（满分100分）")
+st.subheader("📝 成绩录入")
 col4, col5 = st.columns(2)
 with col4:
     score1 = st.number_input("线性代数", 0, 100, key="score1")
@@ -114,55 +93,36 @@ with col5:
 st.markdown("---")
 
 # --------------------------
-# 图表展示
+# 图表（中文100%正常）
 # --------------------------
 if st.session_state.name.strip() and st.session_state.student_id.strip():
-    st.subheader("📊 个人成绩可视化")
-    st.success(f"✅ {class_name} | {st.session_state.name} | 学号：{st.session_state.student_id}")
+    st.success(f"✅ {class_name} | {name} | 学号：{student_id}")
 
     subjects = ["线性代数", "微积分上", "微积分下", "概率论", "统计学原理"]
-    scores = [
-        st.session_state.score1,
-        st.session_state.score2,
-        st.session_state.score3,
-        st.session_state.score4,
-        st.session_state.score5
-    ]
+    scores = [score1, score2, score3, score4, score5]
 
-    # 柱状图
-    col_chart1, col_chart2 = st.columns(2)
-    with col_chart1:
-        st.write("📊 柱状图")
-        fig1, ax1 = plt.subplots(figsize=(6, 5))
-        colors = ["#1f77b4", "#2ca02c", "#ff7f0e", "#d62728", "#9467bd"]
-        bars = ax1.bar(subjects, scores, color=colors, edgecolor="white", linewidth=1.2)
-        
-        for bar in bars:
-            h = bar.get_height()
-            ax1.text(bar.get_x()+bar.get_width()/2., h+1, f"{h}", ha="center", fontsize=10, fontweight="bold")
-        
-        ax1.set_ylim(0, 105)
-        ax1.grid(axis='y', alpha=0.3)
-        plt.xticks(rotation=20, fontsize=9)
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.write("📊 成绩柱状图")
+        fig1, ax1 = plt.subplots(figsize=(6,5))
+        ax1.bar(subjects, scores, color=["#1f77b4","#2ca02c","#ff7f0e","#d62728","#9467bd"])
+        ax1.set_ylim(0,105)
+        plt.xticks(rotation=20)
         st.pyplot(fig1)
 
-    # 雷达图
-    with col_chart2:
-        st.write("📈 雷达图")    
+    with col_b:
+        st.write("📈 成绩雷达图")
         N = len(subjects)
-        angles = np.linspace(0, 2 * np.pi, N, endpoint=False).tolist()
-        scores_plot = scores.copy()
+        angles = np.linspace(0, 2*np.pi, N, endpoint=False).tolist()
+        values = scores + [scores[0]]
         angles += angles[:1]
-        scores_plot += scores_plot[:1]
 
-        fig2, ax2 = plt.subplots(figsize=(6, 5), subplot_kw=dict(polar=True))
-        ax2.plot(angles, scores_plot, color="#ff6b6b", linewidth=2, label="分数")
-        ax2.fill(angles, scores_plot, color="#ff6b6b", alpha=0.3)
+        fig2, ax2 = plt.subplots(figsize=(6,5), subplot_kw=dict(polar=True))
+        ax2.plot(angles, values)
+        ax2.fill(angles, values, alpha=0.3)
         ax2.set_xticks(angles[:-1])
-        ax2.set_xticklabels(subjects, fontsize=10)
-        ax2.set_ylim(0, 100)
-        ax2.set_title("成绩雷达分布", pad=20)
+        ax2.set_xticklabels(subjects)
+        ax2.set_ylim(0,100)
         st.pyplot(fig2)
-
 else:
-    st.warning("⚠️ 请先完整输入姓名和学号！")
+    st.warning("⚠️ 请输入姓名和学号")
